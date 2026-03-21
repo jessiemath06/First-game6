@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jessie Math 捷析- 基準量大冒險</title>
+
+    <meta name="description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+    <meta property="og:title" content="Jessie Math 捷析- - 基準量大冒險">
+    <meta property="og:description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="g6-u6.png">
+    <meta property="og:image:width" content="1024">
+    <meta property="og:image:height" content="1536">
+    <meta property="og:image:alt" content="Jessie Math 遊戲封面">
+    <link rel="image_src" href="g6-u6.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Jessie Math 捷析- - 基準量大冒險">
+    <meta name="twitter:description" content="© 2025–2026 Jessie Math 捷析老師. All rights reserved.">
+    <meta name="twitter:image" content="g6-u6.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-primary: #2c3e50;
+            --brand-accent: #e67e22;
+            --brand-purple: #6c5ce7;
+            --icon-blue: #4285f4;
+            --bg-color: #f0f2f5;
+            --correct: #27ae60;
+            --wrong: #c0392b;
+            --hud-time: #e74c3c;
+            --hud-score: #f1c40f;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            background-image: url('jessie logo.jpg');
+            background-size: cover;
+            background-position: top right;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            display: flex; flex-direction: column;
+            overflow-y: auto; overflow-x: hidden;
+            user-select: none; -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- 0. 強制橫屏提示 (Mobile Only) --- */
+        #rotate-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--brand-primary); color: white; z-index: 9999;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            padding: 20px;
+        }
+        #rotate-overlay i { font-size: 4rem; margin-bottom: 20px; animation: rotatePhone 2s infinite ease-in-out; }
+        @keyframes rotatePhone { 0% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } 100% { transform: rotate(-90deg); } }
+        
+        @media screen and (max-width: 767px) and (orientation: portrait) {
+            header, #game-container, footer { display: none !important; }
+            #rotate-overlay { display: flex; }
+        }
+
+        /* --- 1. Header 導覽列 --- */
+        header {
+            height: 70px; background: rgba(255, 255, 255, 0.95); padding: 0 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100; flex-shrink: 0;
+            border-bottom: 1px solid #eee; backdrop-filter: blur(5px);
+        }
+        .brand-group { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .avatar-circle {
+            width: 45px; height: 45px; border-radius: 50%; border: 3px solid var(--brand-accent);
+            overflow: hidden; display: flex; justify-content: center; align-items: center;
+            background: #fff; flex-shrink: 0;
+        }
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .brand-text { font-family: 'Fredoka One', cursive, sans-serif; font-size: 22px; color: var(--brand-primary); letter-spacing: 0.5px; font-weight: 900; }
+        .nav-group { display: flex; align-items: center; gap: 10px; }
+        .nav-btn {
+            text-decoration: none; color: #5f6368; background: white; border: 1px solid #dadce0;
+            padding: 8px 15px; border-radius: 50px; font-size: 14px; font-weight: bold;
+            display: flex; align-items: center; gap: 6px; transition: all 0.2s; white-space: nowrap;
+        }
+        .nav-btn i { color: var(--icon-blue); font-size: 1rem; }
+        .nav-btn:hover { background-color: #f8f9fa; transform: translateY(-1px); }
+        .nav-btn-purple { color: var(--brand-purple); border: 1.5px solid var(--brand-purple); background: #f8f7ff; }
+        .nav-btn-purple i { color: var(--brand-purple); }
+        .nav-btn-purple:hover { background: var(--brand-purple); color: white; }
+        @media (max-width: 600px) { .brand-text { display: none; } .nav-btn span { font-size: 12px; } .nav-btn { padding: 6px 10px; } }
+
+        /* --- 2. 遊戲主區域 --- */
+        #game-container {
+            flex: 1; display: flex; justify-content: center; align-items: center;
+            padding: 10px; width: 100%; position: relative;
+        }
+        .game-box {
+            width: 100%; max-width: 800px; background: rgba(255, 255, 255, 0.96); border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2); padding: 20px; position: relative;
+            min-height: 550px; display: flex; flex-direction: column; overflow: hidden;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        /* --- Overlays --- */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98); border-radius: 15px; display: flex;
+            flex-direction: column; justify-content: center; align-items: center; z-index: 50;
+            text-align: center; padding: 20px; overflow-y: auto;
+        }
+        .hidden { display: none !important; }
+        h1 { color: var(--brand-primary); font-size: 2.2rem; margin-bottom: 15px; line-height: 1.2; }
+        p { color: #666; font-size: 1rem; margin-bottom: 20px; font-weight: bold;}
+        input[type="text"] {
+            padding: 10px; font-size: 1.2rem; border: 3px solid #ddd; border-radius: 50px;
+            text-align: center; width: 80%; max-width: 250px; margin-bottom: 20px;
+            font-weight: bold; color: var(--brand-primary);
+        }
+        input:focus { border-color: var(--brand-accent); outline: none; }
+
+        .btn {
+            background: var(--brand-accent); color: white; border: none; padding: 12px 20px;
+            font-size: 1.2rem; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 0 #d35400;
+            transition: 0.1s; font-weight: bold; margin: 8px; width: 100%; max-width: 320px;
+            display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn-blue { background: var(--brand-primary); box-shadow: 0 4px 0 #1a252f; }
+        .btn-green { background: var(--correct); box-shadow: 0 4px 0 #1e8449; }
+        .btn-small { padding: 8px 15px; font-size: 1rem; max-width: 200px; }
+
+        .pause-btn-top {
+            position: absolute; top: 15px; right: 15px; width: 40px; height: 40px; border-radius: 50%;
+            background: #f1f2f6; border: 2px solid #ddd; color: #555; font-size: 1.2rem;
+            cursor: pointer; z-index: 40; display: flex; justify-content: center; align-items: center; transition: 0.2s;
+        }
+        .pause-btn-top:hover { background: #e1e2e6; color: var(--brand-primary); }
+
+        /* --- 難度選擇按鈕 --- */
+        .diff-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .diff-btn {
+            background: white; border: 2px solid #ddd; padding: 8px 15px; border-radius: 20px;
+            font-weight: bold; color: #777; cursor: pointer; transition: 0.2s;
+        }
+        .diff-btn.active { background: var(--brand-accent); color: white; border-color: var(--brand-accent); }
+
+        /* --- HUD --- */
+        .hud {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.8); border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
+            margin-bottom: 10px; margin-top: 10px; border-radius: 10px; padding: 5px 10px;
+        }
+        .hud-group { display: flex; gap: 15px; }
+        .hud-item { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+        .hud-label { font-size: 0.8rem; color: #999; font-weight: bold; }
+        .hud-value { font-size: 1.8rem; font-weight: 900; line-height: 1; }
+        #time-disp { color: var(--hud-time); font-family: monospace; }
+        #score-disp { color: var(--hud-score); }
+
+        .combo-box {
+            background: linear-gradient(135deg, #FF9966, #FF5E62); color: white; padding: 5px 15px;
+            border-radius: 20px; font-weight: 900; font-size: 1.2rem; opacity: 0; transform: scale(0.5);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 10px rgba(255, 94, 98, 0.4);
+        }
+        .combo-active { opacity: 1; transform: scale(1); animation: bounce 0.5s; }
+
+        /* --- Scenario Card & Interaction --- */
+        .scenario-card {
+            background: linear-gradient(to bottom, #fdfbfb 0%, #ebedee 100%); border-radius: 12px;
+            padding: 10px; margin-bottom: 10px; display: flex; justify-content: center; align-items: center;
+            height: 100px; border: 2px solid #e0e0e0; position: relative; overflow: hidden;
+        }
+        .scenario-bg { position: absolute; opacity: 0.08; font-size: 7rem; transform: rotate(-10deg); color: var(--brand-primary); }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+
+        .question-area { font-size: 1.3rem; font-weight: 900; text-align: center; color: var(--brand-primary); margin-bottom: 10px; line-height: 1.5; }
+        .highlight { color: #d81b60; text-decoration: underline; text-decoration-thickness: 3px;}
+        .hint-text { text-align: center; color: #7f8c8d; font-weight: bold; margin-bottom: 15px; min-height: 1.5em; font-size: 1.1rem; }
+
+        .stage {
+            flex: 1; display: flex; justify-content: space-around; align-items: flex-end;
+            border-bottom: 4px solid #eee; margin-bottom: 15px; padding-bottom: 5px; min-height: 180px; position: relative;
+        }
+        .char-box { display: flex; flex-direction: column; align-items: center; width: 100px; cursor: pointer; position: relative; transition: transform 0.2s; }
+        .char-box:active { transform: scale(0.95); }
+        .char-box.locked { cursor: default; opacity: 1; }
+        .char-box.dimmed { opacity: 0.4; }
+
+        .bar-model {
+            width: 60px; height: 50px; background: #bdc3c7; border-radius: 10px 10px 0 0;
+            display: flex; justify-content: center; align-items: center; font-size: 30px;
+            color: white; transition: height 0.4s cubic-bezier(0.25, 1, 0.5, 1), background 0.3s;
+            position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .crown { position: absolute; top: -35px; font-size: 24px; display: none; animation: bounce 0.6s infinite alternate; z-index: 10; }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+        .char-name { margin-top: 10px; background: #fff; padding: 5px 15px; border: 2px solid #eee; border-radius: 20px; font-weight: bold; color: var(--brand-primary); font-size: 0.9rem; }
+
+        /* --- Slider Controls --- */
+        .control-panel {
+            background: #fff3e0; padding: 10px; border-radius: 12px; text-align: center;
+            border: 2px dashed var(--brand-accent); display: none; margin-top: auto; animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        input[type=range] { width: 90%; margin: 15px 0; -webkit-appearance: none; height: 12px; background: #ddd; border-radius: 10px; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 28px; height: 28px; background: var(--brand-accent);
+            border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); border: 2px solid white;
+        }
+        .val-display { font-size: 1.8rem; font-weight: 900; color: var(--brand-accent); margin-left: 5px; vertical-align: middle; }
+
+        /* --- Stars & Rank --- */
+        .stars-container { font-size: 3rem; color: #ddd; margin: 10px 0; }
+        .star.active { color: #f1c40f; text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+
+        .rank-list {
+            width: 100%; max-width: 600px; text-align: left; margin-top: 10px;
+            border: 2px solid #eee; border-radius: 10px; overflow-y: auto; max-height: 250px;
+            background: #fafafa; margin-bottom: 10px;
+        }
+        .rank-item {
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 12px;
+            border-bottom: 1px solid #eee; font-weight: bold; font-size: 0.9rem;
+        }
+        .rank-info { flex: 1.2; display: flex; align-items: center; gap: 8px; color: var(--brand-primary); }
+        .rank-meta-col { flex: 2; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
+        .rank-score { flex: 1; text-align: right; font-size: 1.2rem; color: var(--brand-accent); display:flex; flex-direction:column; align-items:flex-end; justify-content:center;}
+        .rank-meta { font-size: 0.75rem; color: #888; background: #eee; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 3px; }
+        .rank-date { font-size: 0.7rem; color: #aaa; }
+
+        .urgent { color: red !important; animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* --- Review List --- */
+        .review-box {
+            width: 100%; max-width: 600px; text-align: left; background: #fff; border-radius: 10px;
+            border: 2px solid #ddd; padding: 10px; max-height: 350px; overflow-y: auto; margin-bottom: 15px;
+        }
+        .review-item {
+            padding: 10px; border-bottom: 1px dashed #ccc; font-size: 0.9rem; line-height: 1.4;
+        }
+        .review-item:last-child { border-bottom: none; }
+        .review-q { font-weight: bold; color: var(--brand-primary); margin-bottom: 5px; }
+        .review-ans { color: #555; }
+        .review-ans span { font-weight: bold; }
+        .correct-text { color: var(--correct); }
+        .wrong-text { color: var(--wrong); }
+
+        /* --- Mascot / Cheerleader --- */
+        #mascot-container {
+            position: absolute;
+            bottom: 80px;
+            right: 15px;
+            display: none;
+            flex-direction: column;
+            align-items: flex-end;
+            z-index: 100;
+            pointer-events: none;
+            animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(120px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOutDown {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(30px); opacity: 0; }
+        }
+        .mascot-bubble {
+            background: white;
+            border: 2px solid var(--brand-accent);
+            border-radius: 15px 15px 0 15px;
+            padding: 6px 12px;
+            font-weight: 900;
+            color: var(--brand-primary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            margin-bottom: 8px;
+            max-width: 160px;
+            text-align: center;
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+        .mascot-img {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            object-fit: cover;
+            background: #f0f2f5;
+        }
+
+        /* --- 3. Footer 品牌膠囊條 --- */
+        footer{ width:100%; padding: 12px 10px; flex-shrink: 0; background: transparent; }
+        .footer-pill{
+            max-width: 980px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); border: 1px solid #eee; border-radius: 999px;
+            padding: 10px 14px; display:flex; align-items:center; justify-content: space-between; gap: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06); backdrop-filter: blur(5px);
+        }
+        .footer-left{ display:flex; align-items:center; gap:10px; min-width: 0; }
+        .footer-dot{
+            width: 30px; height: 30px; border-radius: 50%; background: #FFD700; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.10);
+            flex-shrink: 0; position: relative;
+        }
+        .footer-dot::after{ content:""; position:absolute; inset: 6px; border-radius: 50%; background: rgba(255,255,255,0.65); }
+        .footer-copy{ font-weight: 900; color: var(--brand-primary); font-size: 0.86rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .footer-right{ display:flex; align-items:center; gap:10px; flex-shrink: 0; }
+        .footer-tagline{ font-weight: 900; color: var(--brand-accent); font-size: 0.9rem; white-space: nowrap; }
+        .footer-icon{
+            width: 34px; height: 34px; border-radius: 999px; border: 1px solid #dadce0; background: #fff;
+            display:flex; align-items:center; justify-content:center; color: var(--icon-blue);
+        }
+        @media (max-width: 640px){
+            .footer-pill{ border-radius: 22px; flex-direction: column; align-items: flex-start; }
+            .footer-right{ width: 100%; justify-content: flex-start; }
+            .footer-copy, .footer-tagline{ white-space: normal; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="rotate-overlay">
+        <i class="fas fa-mobile-alt"></i>
+        <h2>請將手機旋轉至橫向</h2>
+        <p style="margin-top:10px; font-weight:normal; color:#ddd;">此遊戲在橫屏模式下體驗最佳</p>
+    </div>
+
+    <header>
+        <a href="https://jessiemath0703-chu.github.io/website2/" class="brand-group">
+            <div class="avatar-circle">
+                <img src="JESSIEMATH-Q.png" alt="J" onerror="this.src='https://ui-avatars.com/api/?name=JM&background=e67e22&color=fff'">
+            </div>
+            <span class="brand-text">Jessie Math 捷析</span>
+        </a>
+        <div class="nav-group">
+            <a href="https://jessiemath0703-chu.github.io/website2/" class="nav-btn"><i class="fas fa-home"></i> <span>首頁</span></a>
+            <a href="https://jessiemath0703-chu.github.io/Game-Lobby/" class="nav-btn"><i class="fas fa-gamepad"></i> <span>遊戲大廳</span></a>
+            <a href="https://jessiemath0703-chu.github.io/Game-Lobby/#g6-u6" class="nav-btn nav-btn-purple"><i class="fas fa-undo"></i> <span>G6基準量與比較量</span></a>
+        </div>
+    </header>
+
+    <div id="game-container">
+        <div class="game-box">
+
+            <button class="pause-btn-top hidden" id="btn-pause" onclick="game.togglePause()"><i class="fas fa-pause"></i></button>
+
+            <div id="screen-start" class="overlay">
+                <div style="font-size: 4rem; margin-bottom: 10px;">🧪</div>
+                <h1>基準量大冒險</h1>
+                <p>輸入代號，準備極限挑戰！</p>
+                <input type="text" id="player-name" placeholder="請輸入名字" maxlength="8">
+                <button class="btn" onclick="game.goToLevelSelect()">下一步 <i class="fas fa-arrow-right"></i></button>
+            </div>
+
+            <div id="screen-select" class="overlay hidden">
+                <h1>選擇關卡與難度</h1>
+                <p>嗨，<span id="display-name" style="color:var(--brand-accent); font-weight:bold;"></span>！</p>
+
+                <div class="diff-group">
+                    <button class="diff-btn active" id="diff-basic" onclick="game.setDifficulty('基礎', 90, 'diff-basic')">基礎 90秒</button>
+                    <button class="diff-btn" id="diff-adv" onclick="game.setDifficulty('進階', 60, 'diff-adv')">進階 60秒</button>
+                    <button class="diff-btn" id="diff-master" onclick="game.setDifficulty('魔王', 45, 'diff-master')">魔王 45秒</button>
+                </div>
+
+                <div style="width:100%; max-width:600px; margin:5px 0 10px;">
+                    <p style="color:var(--brand-accent); margin-bottom:5px; font-size:1rem;"><i class="fas fa-trophy"></i> 榮譽榜 TOP 10</p>
+                    <div class="rank-list" id="rank-content-start"></div>
+                </div>
+
+                <button class="btn" onclick="game.startLevel(1, 'Lv 1：找基準量')">Lv 1：找基準量 <br><span style="font-size:0.8rem; font-weight:normal;">(基礎識別)</span></button>
+                <button class="btn" onclick="game.startLevel(2, 'Lv 2：找比較量')">Lv 2：找比較量 <br><span style="font-size:0.8rem; font-weight:normal;">(識別+調整數值)</span></button>
+                <button class="btn btn-blue" onclick="game.startLevel(3, 'Lv 3：混合挑戰')">Lv 3：混合大挑戰 <br><span style="font-size:0.8rem; font-weight:normal;">(隨機題型)</span></button>
+            </div>
+
+            <div id="screen-pause" class="overlay hidden">
+                <h1>暫停中 ⏸️</h1>
+                <button class="btn btn-green" onclick="game.togglePause()">繼續遊戲</button>
+                <button class="btn" onclick="game.restartLevel()">重新本關 (分數歸零)</button>
+                <button class="btn btn-blue" onclick="game.backToSelect()">回關卡選單</button>
+            </div>
+
+            <div id="screen-end" class="overlay hidden">
+                <h1>時間到！🔔</h1>
+                <div class="stars-container" id="final-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                <p>最終分數：<span id="final-score" style="font-size:2.5rem; color:var(--brand-accent); font-weight:900;">0</span></p>
+
+                <div class="rank-list" id="rank-content"></div>
+
+                <div style="display:flex; flex-direction:column; gap:10px; width:100%; align-items:center;">
+                    <button class="btn btn-green" onclick="game.showReview()"><i class="fas fa-search"></i> 查看復盤</button>
+                    <button class="btn" onclick="game.restartLevel()"><i class="fas fa-redo"></i> 再玩一次</button>
+                    <button class="btn btn-blue" onclick="game.backToSelect()"><i class="fas fa-list"></i> 回關卡選單</button>
+                </div>
+            </div>
+
+            <div id="screen-review" class="overlay hidden">
+                <h1>復盤紀錄 📝</h1>
+                <p>來看看剛剛的作答情況</p>
+                <div class="review-box" id="review-list">
+                    </div>
+                <button class="btn btn-blue" onclick="game.hideReview()"><i class="fas fa-check"></i> 關閉復盤</button>
+            </div>
+
+            <div class="hud">
+                <div class="hud-group">
+                    <div class="hud-item"><span class="hud-label">剩餘時間</span><span class="hud-value" id="time-disp">60</span></div>
+                    <div class="hud-item"><span class="hud-label">分數</span><span class="hud-value" id="score-disp">0</span></div>
+                </div>
+                <div id="combo-box" class="combo-box">COMBO x2</div>
+            </div>
+
+            <div class="scenario-card">
+                <i class="fas fa-balance-scale-left scenario-bg"></i>
+                <div id="scenario-icon" style="width:100%;"></div>
+            </div>
+
+            <div class="question-area" id="question-text">題目載入中...</div>
+            <div class="hint-text" id="hint">準備開始...</div>
+
+            <div class="stage">
+                <div class="char-box" id="char-A" onclick="game.handleClick('A')">
+                    <div class="crown">👑</div>
+                    <div class="bar-model"><span class="emoji" id="emoji-A">🐶</span></div>
+                    <div class="char-name" id="name-A">小狗</div>
+                </div>
+                <div class="char-box" id="char-B" onclick="game.handleClick('B')">
+                    <div class="crown">👑</div>
+                    <div class="bar-model"><span class="emoji" id="emoji-B">🐱</span></div>
+                    <div class="char-name" id="name-B">小貓</div>
+                </div>
+            </div>
+
+            <div class="control-panel" id="controls">
+                <p style="color:var(--brand-accent); font-weight:bold; font-size:1.1rem; margin:0;">調整比較量：<span class="val-display" id="slider-val">+0</span></p>
+                <input type="range" id="slider" min="-30" max="30" step="1" value="0" oninput="game.updateSlider(this.value)">
+                <br>
+                <button class="btn btn-blue btn-small" style="margin-top:5px;" onclick="game.submitSlider()">確認答案</button>
+            </div>
+            
+            <div id="mascot-container">
+                <div class="mascot-bubble" id="mascot-text">加油！</div>
+                <img src="JESSIEMATH-Q.png" class="mascot-img" alt="捷析老師" onerror="this.style.display='none'">
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-pill">
+            <div class="footer-left">
+                <div class="footer-dot" aria-hidden="true"></div>
+                <div class="footer-copy">© 2025–2026 Jessie Math 捷析老師. All rights reserved.</div>
+            </div>
+            <div class="footer-right">
+                <div class="footer-icon" aria-hidden="true"><i class="fas fa-compass"></i></div>
+                <div class="footer-tagline">數學不迷路，捷析Jessie 帶你走向理解。</div>
+            </div>
+        </div>
+    </footer>
+
+<script>
+// 擴充題庫至 40 組
+const ROLE_DB = [
+    {A:'小狗', B:'小貓', emojiA:'🐶', emojiB:'🐱', unit:'隻'},
+    {A:'蘋果', B:'橘子', emojiA:'🍎', emojiB:'🍊', unit:'顆'},
+    {A:'哥哥', B:'弟弟', emojiA:'👦', emojiB:'👶', unit:'歲'},
+    {A:'紅箱', B:'藍箱', emojiA:'🟥', emojiB:'🟦', unit:'公斤'},
+    {A:'存錢筒', B:'錢包', emojiA:'🐷', emojiB:'👛', unit:'元'},
+    {A:'兔子', B:'烏龜', emojiA:'🐰', emojiB:'🐢', unit:'隻'},
+    {A:'漢堡', B:'薯條', emojiA:'🍔', emojiB:'🍟', unit:'份'},
+    {A:'大樹', B:'小花', emojiA:'🌲', emojiB:'🌸', unit:'棵'},
+    {A:'足球', B:'籃球', emojiA:'⚽', emojiB:'🏀', unit:'顆'},
+    {A:'蛋糕', B:'甜甜', emojiA:'🍰', emojiB:'🍩', unit:'個'},
+    {A:'鉛筆', B:'橡皮', emojiA:'✏️', emojiB:'🧽', unit:'個'},
+    {A:'汽車', B:'機車', emojiA:'🚗', emojiB:'🏍️', unit:'台'},
+    {A:'草莓', B:'哈密瓜', emojiA:'🍓', emojiB:'🍈', unit:'顆'},
+    {A:'老鷹', B:'麻雀', emojiA:'🦅', emojiB:'🐦', unit:'隻'},
+    {A:'布丁', B:'果凍', emojiA:'🍮', emojiB:'🍧', unit:'個'},
+    {A:'男同學', B:'女同學', emojiA:'👦', emojiB:'👧', unit:'人'},
+    {A:'太陽', B:'月亮', emojiA:'☀️', emojiB:'🌙', unit:'個'},
+    {A:'紅筆', B:'藍筆', emojiA:'🖊️', emojiB:'🖋️', unit:'支'},
+    {A:'西裝', B:'洋裝', emojiA:'👔', emojiB:'👗', unit:'件'},
+    {A:'火箭', B:'飛機', emojiA:'🚀', emojiB:'✈️', unit:'架'},
+    {A:'電腦', B:'手機', emojiA:'💻', emojiB:'📱', unit:'台'},
+    {A:'大象', B:'長頸鹿', emojiA:'🐘', emojiB:'🦒', unit:'隻'},
+    {A:'珍珠奶茶', B:'紅茶', emojiA:'🧋', emojiB:'☕', unit:'杯'},
+    {A:'香蕉', B:'葡萄', emojiA:'🍌', emojiB:'🍇', unit:'根/串'},
+    {A:'高麗菜', B:'花椰菜', emojiA:'🥬', emojiB:'🥦', unit:'顆'},
+    {A:'公車', B:'火車', emojiA:'🚌', emojiB:'🚆', unit:'班'},
+    {A:'吉他', B:'鋼琴', emojiA:'🎸', emojiB:'🎹', unit:'把/台'},
+    {A:'獅子', B:'老虎', emojiA:'🦁', emojiB:'🐅', unit:'隻'},
+    {A:'手錶', B:'時鐘', emojiA:'⌚', emojiB:'🕰️', unit:'個'},
+    {A:'背包', B:'提袋', emojiA:'🎒', emojiB:'🛍️', unit:'個'},
+    {A:'恐龍', B:'怪獸', emojiA:'🦖', emojiB:'👾', unit:'隻'},
+    {A:'洋芋片', B:'爆米花', emojiA:'🥔', emojiB:'🍿', unit:'包'},
+    {A:'企鵝', B:'北極熊', emojiA:'🐧', emojiB:'🐻‍❄️', unit:'隻'},
+    {A:'警察', B:'消防員', emojiA:'👮', emojiB:'🧑‍🚒', unit:'人'},
+    {A:'醫生', B:'護士', emojiA:'👨‍⚕️', emojiB:'👩‍⚕️', unit:'人'},
+    {A:'星星', B:'雲朵', emojiA:'⭐', emojiB:'☁️', unit:'個'},
+    {A:'玫瑰', B:'向日葵', emojiA:'🌹', emojiB:'🌻', unit:'朵'},
+    {A:'西瓜', B:'水蜜桃', emojiA:'🍉', emojiB:'🍑', unit:'顆'},
+    {A:'相機', B:'錄影機', emojiA:'📷', emojiB:'📹', unit:'台'},
+    {A:'螞蟻', B:'蜜蜂', emojiA:'🐜', emojiB:'🐝', unit:'隻'}
+];
+
+class MathGame {
+    constructor() {
+        this.playerName = "玩家";
+        this.level = 1;
+        this.levelName = "";
+        this.difficultyName = "基礎";
+        this.difficultyTime = 90;
+        
+        this.score = 0;
+        this.combo = 0;
+        this.timeLeft = 60;
+        this.timerInterval = null;
+        this.leaderboard = this.loadLeaderboard();
+        
+        this.qData = null;
+        this.phase = 0; 
+        this.isPaused = false;
+        this.isFeedbacking = false; 
+
+        this.shuffledRoles = [];
+        this.currentRoleIndex = 0;
+        this.history = []; 
+        this.currentQRecord = {}; 
+        
+        this.mascotTimeout = null;
+
+        this.renderLeaderboard('rank-content-start');
+    }
+
+    loadLeaderboard() {
+        const saved = localStorage.getItem('jessieMath_v2_rank');
+        return saved ? JSON.parse(saved) : [];
+    }
+
+    saveLeaderboard() {
+        localStorage.setItem('jessieMath_v2_rank', JSON.stringify(this.leaderboard));
+    }
+
+    goToLevelSelect() {
+        const name = document.getElementById('player-name').value.trim();
+        if(!name) { alert("請輸入名字！"); return; }
+        this.playerName = name;
+        document.getElementById('display-name').innerText = name;
+        this.showScreen('screen-select');
+        document.getElementById('btn-pause').classList.add('hidden');
+    }
+
+    setDifficulty(name, time, btnId) {
+        this.difficultyName = name;
+        this.difficultyTime = time;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(btnId).classList.add('active');
+    }
+
+    showScreen(screenId) {
+        document.querySelectorAll('.overlay').forEach(el => el.classList.add('hidden'));
+        if(screenId) document.getElementById(screenId).classList.remove('hidden');
+    }
+
+    startLevel(lvl, lvlName) {
+        this.level = lvl;
+        this.levelName = lvlName;
+        this.score = 0;
+        this.combo = 0;
+        this.timeLeft = this.difficultyTime;
+        this.isPaused = false;
+        this.isFeedbacking = false;
+        this.history = []; 
+        this.shuffleRoleDeck(); 
+
+        document.getElementById('score-disp').innerText = "0";
+        this.updateComboUI();
+        document.getElementById('time-disp').innerText = this.timeLeft;
+        document.getElementById('time-disp').classList.remove('urgent');
+
+        this.showScreen(null);
+        document.getElementById('btn-pause').classList.remove('hidden');
+
+        if(this.timerInterval) clearInterval(this.timerInterval);
+        this.timerInterval = setInterval(() => {
+            if (!this.isPaused) {
+                this.timeLeft--;
+                const timerEl = document.getElementById('time-disp');
+                timerEl.innerText = this.timeLeft;
+                if (this.timeLeft <= 10) timerEl.classList.add('urgent');
+                if (this.timeLeft <= 0) this.endGame();
+                
+                // 隨機出現鼓勵的吉祥物 (待機狀態)
+                if (!this.isFeedbacking && Math.random() < 0.05 && document.getElementById('mascot-container').style.display !== 'flex') {
+                    this.showMascot('idle');
+                }
+            }
+        }, 1000);
+
+        this.nextQuestion();
+    }
+
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        const btn = document.getElementById('btn-pause');
+        if (this.isPaused) {
+            document.getElementById('screen-pause').classList.remove('hidden');
+            btn.innerHTML = '<i class="fas fa-play"></i>';
+        } else {
+            document.getElementById('screen-pause').classList.add('hidden');
+            btn.innerHTML = '<i class="fas fa-pause"></i>';
+        }
+    }
+
+    restartLevel() { this.startLevel(this.level, this.levelName); }
+
+    backToSelect() {
+        if(this.timerInterval) clearInterval(this.timerInterval);
+        this.showScreen('screen-select');
+        document.getElementById('btn-pause').classList.add('hidden');
+        this.renderLeaderboard('rank-content-start');
+    }
+
+    shuffleRoleDeck() {
+        let deck = [...ROLE_DB];
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        this.shuffledRoles = deck;
+        this.currentRoleIndex = 0;
+    }
+
+    getDailyRole() {
+        if (this.currentRoleIndex >= this.shuffledRoles.length) {
+            this.shuffleRoleDeck(); 
+        }
+        return this.shuffledRoles[this.currentRoleIndex++];
+    }
+
+    nextQuestion() {
+        this.isFeedbacking = false;
+        this.resetUI();
+        const r = this.getDailyRole();
+
+        const isBaseA = Math.random() > 0.5;
+        const baseObj = isBaseA ? 'A' : 'B';
+        const targetObj = isBaseA ? 'B' : 'A';
+        const baseName = isBaseA ? r.A : r.B;
+        const targetName = isBaseA ? r.B : r.A;
+
+        let type = 'diff';
+        if (this.level === 3) type = Math.random() > 0.5 ? 'diff' : 'ratio';
+        else if (Math.random() > 0.6) type = 'ratio';
+
+        let val = 0;
+        let qText = "";
+        const templates = [];
+
+        if (type === 'diff') {
+            val = Math.floor(Math.random()*30) + 1; 
+            const isMore = Math.random() > 0.5;
+            const opStr = isMore ? '多' : '少';
+            const actionStr = isMore ? '加上' : '扣掉';
+            const valSigned = isMore ? val : -val;
+
+            templates.push(`${targetName} 比 ${baseName} <span class="highlight">${opStr} ${val} ${r.unit}</span>`);
+            templates.push(`${targetName} 的數量是 ${baseName} <span class="highlight">${opStr} ${val} ${r.unit}</span>`);
+            templates.push(`${baseName} 再<span class="highlight">${actionStr} ${val} ${r.unit}</span> 就是 ${targetName}`);
+
+            qText = templates[Math.floor(Math.random() * templates.length)];
+            val = valSigned;
+        } else {
+            const ratioOptions = [0.1, 0.2, 0.5, 0.8, 1.2, 1.5, 2, 2.5, 3, 4, 5, 8, 10];
+            val = ratioOptions[Math.floor(Math.random()*ratioOptions.length)];
+            
+            templates.push(`${targetName} 是 ${baseName} 的 <span class="highlight">${val} 倍</span>`);
+            templates.push(`${targetName} 數量剛好是 ${baseName} 的 <span class="highlight">${val} 倍</span>`);
+            qText = templates[Math.floor(Math.random() * templates.length)];
+        }
+
+        document.getElementById('question-text').innerHTML = qText;
+        document.getElementById('name-A').innerText = r.A;
+        document.getElementById('emoji-A').innerText = r.emojiA;
+        document.getElementById('name-B').innerText = r.B;
+        document.getElementById('emoji-B').innerText = r.emojiB;
+
+        const sceneHtml = `
+            <div style="display:flex; justify-content:center; align-items:center; gap:25px;">
+                <div style="font-size:3.5rem; animation: popIn 0.5s;">${r.emojiA}</div>
+                <div style="font-size:1.5rem; color:#cbd5e0;"><i class="fas fa-exchange-alt"></i></div>
+                <div style="font-size:3.5rem; animation: popIn 0.5s 0.2s backwards;">${r.emojiB}</div>
+            </div>
+        `;
+        document.getElementById('scenario-icon').innerHTML = sceneHtml;
+
+        this.qData = { base: baseObj, target: targetObj, type, val, baseName: baseName };
+        
+        this.currentQRecord = {
+            qHtml: qText,
+            correctBaseName: baseName,
+            correctBaseId: baseObj,
+            correctVal: val,
+            type: type,
+            levelRule: this.level
+        };
+
+        if (this.level === 1) {
+            this.phase = 0;
+            this.setHint("👇 請點擊「基準量」（是誰原本就在那？）");
+        } else {
+            this.phase = 0;
+            this.setHint("第 1 步：找出基準量");
+        }
+    }
+
+    resetUI() {
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('slider').value = 0;
+        document.getElementById('slider-val').innerText = "+0";
+        ['A', 'B'].forEach(id => {
+            const el = document.getElementById('char-'+id);
+            el.classList.remove('locked', 'dimmed');
+            el.querySelector('.crown').style.display = 'none';
+            const bar = el.querySelector('.bar-model');
+            bar.style.height = '';
+            bar.style.backgroundColor = '#bdc3c7';
+        });
+    }
+
+    handleClick(id) {
+        if (this.phase !== 0 || this.isFeedbacking) return;
+
+        if (id === this.qData.base) {
+            this.visualizeBase(id);
+            if (this.level === 1) {
+                this.addScore(50);
+                this.recordHistory(true, "基準量選擇正確", "-");
+                this.handleCorrect();
+            } else {
+                this.phase = 1;
+                this.setHint("第 2 步：調整滑桿來表示題目意思", true);
+                this.showSlider();
+            }
+        } else {
+            this.recordHistory(false, `錯選 ${id === 'A' ? document.getElementById('name-A').innerText : document.getElementById('name-B').innerText}`, "基準量找錯囉");
+            this.handleWrong(`正確基準量是「${this.qData.baseName}」！已幫您紀錄，馬上進入下一題。`);
+        }
+    }
+
+    visualizeBase(id) {
+        const el = document.getElementById('char-'+id);
+        el.querySelector('.crown').style.display = 'block';
+        el.querySelector('.bar-model').style.backgroundColor = 'var(--brand-accent)';
+        el.classList.add('locked');
+        const other = id === 'A' ? 'B' : 'A';
+        document.getElementById('char-'+other).classList.add('dimmed', 'locked');
+    }
+
+    showSlider() {
+        const box = document.getElementById('controls');
+        const slider = document.getElementById('slider');
+        box.style.display = 'block';
+        if (this.qData.type === 'ratio') {
+            slider.min = 0.1; slider.max = 10; slider.step = 0.1; slider.value = 1;
+        } else {
+            slider.min = -30; slider.max = 30; slider.step = 1; slider.value = 0;
+        }
+        this.updateSlider(slider.value);
+    }
+
+    updateSlider(val) {
+        const display = document.getElementById('slider-val');
+        const targetBody = document.querySelector(`#char-${this.qData.target} .bar-model`);
+        const baseH = window.innerWidth < 768 ? 50 : 80;
+        let h = baseH;
+        let txt = "";
+        
+        val = parseFloat(parseFloat(val).toFixed(1));
+
+        if (this.qData.type === 'ratio') {
+            txt = `× ${val}`;
+            h = baseH * (val > 3 ? 3 : val); 
+        } else {
+            const sign = val > 0 ? '+' : '';
+            txt = `${sign}${val}`;
+            const step = window.innerWidth < 768 ? 4 : 6;
+            h = baseH + (parseInt(val) * step);
+        }
+        display.innerText = txt;
+        targetBody.style.height = Math.max(20, h) + "px";
+        targetBody.style.backgroundColor = 'var(--brand-primary)';
+    }
+
+    submitSlider() {
+        if(this.isFeedbacking) return;
+        const val = parseFloat(document.getElementById('slider').value);
+        let userStr = this.qData.type === 'ratio' ? `× ${val}` : (val>0?'+':'') + val;
+        let correctStr = this.qData.type === 'ratio' ? `× ${this.qData.val}` : (this.qData.val>0?'+':'') + this.qData.val;
+
+        if (val === this.qData.val) {
+            this.addScore(100);
+            this.recordHistory(true, "基準量正確", `數值正確 (${userStr})`);
+            this.handleCorrect();
+        } else {
+            this.recordHistory(false, "基準量正確", `錯選 ${userStr} (正確: ${correctStr})`);
+            this.handleWrong(`數值不對喔！正確應該是「${correctStr}」。已紀錄並準備下一題。`);
+        }
+    }
+
+    recordHistory(isCorrect, baseResult, valResult) {
+        this.history.push({
+            qHtml: this.currentQRecord.qHtml,
+            isCorrect: isCorrect,
+            baseResult: baseResult,
+            valResult: valResult
+        });
+    }
+
+    handleCorrect() {
+        this.isFeedbacking = true;
+        this.combo++;
+        this.updateComboUI();
+        this.setHint(`🎉 答對了！ (Combo x${this.combo})`, true);
+        this.showMascot('correct');
+        setTimeout(() => this.nextQuestion(), 1000);
+    }
+
+    handleWrong(msg) {
+        this.isFeedbacking = true;
+        this.combo = 0;
+        this.updateComboUI();
+        this.addScore(-10);
+        this.setHint(`❌ ${msg}`, false);
+        document.querySelectorAll('.char-box').forEach(el => el.classList.add('locked'));
+        this.showMascot('wrong');
+        setTimeout(() => this.nextQuestion(), 2500); 
+    }
+
+    showMascot(type) {
+        const container = document.getElementById('mascot-container');
+        const textEl = document.getElementById('mascot-text');
+        let messages = [];
+
+        if (type === 'correct') {
+            messages = ['太棒了！', '繼續保持！', '你太神啦！', '完美！', '思路很清晰喔！', '就是這樣！'];
+        } else if (type === 'wrong') {
+            messages = ['沒關係，再試一次！', '加油！快找到了', '小心計算喔！', '老師相信你！', '仔細看題目！', '再想一下下~'];
+        } else if (type === 'idle') {
+            messages = ['時間滴答滴答~', '你可以的！', '數學不迷路！', '深呼吸，慢慢來~'];
+        }
+
+        textEl.innerText = messages[Math.floor(Math.random() * messages.length)];
+        
+        container.style.display = 'flex';
+        container.style.animation = 'slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
+        if (this.mascotTimeout) clearTimeout(this.mascotTimeout);
+        this.mascotTimeout = setTimeout(() => {
+            container.style.animation = 'fadeOutDown 0.4s ease forwards';
+            setTimeout(() => {
+                container.style.display = 'none';
+                container.style.animation = '';
+            }, 400);
+        }, 2500);
+    }
+
+    setHint(msg, isGood) {
+        const el = document.getElementById('hint');
+        el.innerHTML = msg;
+        if (isGood === true) el.style.color = 'var(--correct)';
+        else if (isGood === false) el.style.color = 'var(--wrong)';
+        else el.style.color = '#7f8c8d';
+    }
+
+    addScore(points) {
+        let finalPoints = points;
+        if (points > 0 && this.combo > 1) {
+            finalPoints = Math.floor(points * (1 + (this.combo * 0.1)));
+        }
+        this.score += finalPoints;
+        if (this.score < 0) this.score = 0;
+        document.getElementById('score-disp').innerText = this.score;
+    }
+
+    updateComboUI() {
+        const box = document.getElementById('combo-box');
+        if (this.combo > 1) {
+            box.innerText = `COMBO x${this.combo}`;
+            box.classList.add('combo-active');
+        } else {
+            box.classList.remove('combo-active');
+        }
+    }
+
+    endGame() {
+        clearInterval(this.timerInterval);
+        document.getElementById('btn-pause').classList.add('hidden');
+        this.showScreen('screen-end');
+        document.getElementById('final-score').innerText = this.score;
+
+        const starsEl = document.getElementById('final-stars');
+        starsEl.innerHTML = '';
+        let stars = 1;
+        if (this.score > 500) stars = 2;
+        if (this.score > 1000) stars = 3;
+
+        for(let i=0; i<3; i++) {
+            const s = document.createElement('i');
+            s.className = 'fas fa-star star ' + (i < stars ? 'active' : '');
+            starsEl.appendChild(s);
+        }
+
+        this.updateLeaderboard();
+    }
+
+    updateLeaderboard() {
+        if(this.score > 0) {
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+
+            this.leaderboard.push({
+                name: this.playerName,
+                score: this.score,
+                level: this.levelName.split('：')[0],
+                difficulty: this.difficultyName,
+                date: dateStr,
+                time: Date.now(),
+                totalQs: this.history.length
+            });
+            this.leaderboard.sort((a,b) => b.score - a.score);
+            if(this.leaderboard.length > 10) this.leaderboard = this.leaderboard.slice(0, 10);
+            this.saveLeaderboard();
+        }
+        this.renderLeaderboard('rank-content');
+    }
+
+    renderLeaderboard(containerId) {
+        const list = document.getElementById(containerId);
+        if(!list) return;
+        list.innerHTML = "";
+
+        if (this.leaderboard.length === 0) {
+            list.innerHTML = '<div style="padding:15px; text-align:center; color:#999;">暫無紀錄</div>';
+            return;
+        }
+
+        this.leaderboard.forEach((p, i) => {
+            const div = document.createElement('div');
+            div.className = "rank-item";
+            
+            let medal = "🏅";
+            if(i===0) medal = "🥇";
+            if(i===1) medal = "🥈";
+            if(i===2) medal = "🥉";
+
+            div.innerHTML = `
+                <div class="rank-info">
+                    <span style="font-size:1.4rem; width:28px; text-align:center; display:inline-block;">${medal}</span>
+                    <span style="font-size:1.05rem;">${p.name}</span>
+                </div>
+                <div class="rank-meta-col">
+                    <div class="rank-meta">${p.level} | ${p.difficulty}</div>
+                    <div class="rank-date">${p.date || '-'}</div>
+                </div>
+                <div class="rank-score">
+                    <span>${p.score} 分</span>
+                    <span style="font-size:0.75rem; color:#888;">共 ${p.totalQs ? p.totalQs : '-'} 題</span>
+                </div>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    showReview() {
+        const container = document.getElementById('review-list');
+        container.innerHTML = "";
+        
+        let total = this.history.length;
+        let correctCount = this.history.filter(h => h.isCorrect).length;
+        let wrongCount = total - correctCount;
+
+        // 頂部統計數據
+        let summaryHtml = `
+            <div style="display:flex; justify-content:space-around; background:#f8f9fa; padding:10px; border-radius:8px; margin-bottom:15px; font-weight:bold; border:1px solid #eee;">
+                <div style="color:var(--brand-accent);">此次分數: ${this.score}</div>
+                <div style="color:var(--correct);">答對: ${correctCount} / ${total}題</div>
+                <div style="color:var(--wrong);">答錯: ${wrongCount} / ${total}題</div>
+            </div>
+        `;
+        
+        if (total === 0) {
+            container.innerHTML = "<p style='text-align:center; padding:20px;'>本局沒有作答紀錄喔！</p>";
+        } else {
+            container.innerHTML = summaryHtml;
+            this.history.forEach((h, i) => {
+                const div = document.createElement('div');
+                div.className = "review-item";
+                const icon = h.isCorrect ? '<i class="fas fa-check-circle correct-text"></i>' : '<i class="fas fa-times-circle wrong-text"></i>';
+                
+                div.innerHTML = `
+                    <div class="review-q">${i+1}. ${h.qHtml}</div>
+                    <div class="review-ans">
+                        ${icon} 基準量判斷: <span>${h.baseResult}</span> <br>
+                        ${icon} 比較量調整: <span>${h.valResult}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        document.getElementById('screen-end').classList.add('hidden');
+        document.getElementById('screen-review').classList.remove('hidden');
+    }
+
+    hideReview() {
+        document.getElementById('screen-review').classList.add('hidden');
+        document.getElementById('screen-end').classList.remove('hidden');
+    }
+}
+
+const game = new MathGame();
+</script>
+</body>
+</html>
